@@ -1,1 +1,22 @@
-language:generic sudo:required services:docker before_install:docker build -t vladasha256/react-test -f ./client/Dockerfile.dev ./client script:docker run -e CI=true vladasha256/react-test npm test after_success:docker build -t vladasha256/multi-client ./client - docker build -t vladasha256/multi-nginx ./nginx - docker build -t vladasha256/multi-server ./server - docker build -t vladasha256/multi-worker ./worker
+language: generic
+sudo: required
+services:
+  - docker
+before_install:
+  - docker build -t vladasha256/react-test -f ./client/Dockerfile.dev ./client
+script:
+  - docker run -e CI=true vladasha256/react-test npm test
+after_success:
+  - docker build -t vladasha256/multi-client ./client
+  - docker build -t vladasha256/multi-nginx ./nginx
+  - docker build -t vladasha256/multi-server ./server
+  - docker build -t vladasha256/multi-worker ./worker
+
+  # Login into Docker CLI #
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+
+  # Push images to docker hub #
+  - docker push vladasha256/multi-client
+  - docker push vladasha256/multi-nginx
+  - docker push vladasha256/multi-server
+  - docker push vladasha256/multi-worker
